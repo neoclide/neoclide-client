@@ -39,7 +39,7 @@ export default class Neovim extends Emitter {
     this.cmdlineIM = null
     const input = this.clientInput = new ClientInput(root, proxy)
     // bind all input events
-    input.on('contextmenu', pos => this.emit("contextmenu", pos))
+    input.on('contextmenu', ev => this.emit("contextmenu", ev))
     input.on('cursor', pos => {
       store.dispatch(A.moveCursor(pos.line, pos.col))
     })

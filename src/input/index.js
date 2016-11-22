@@ -44,7 +44,10 @@ export default class ClientInput extends Emitter {
     input.on('focusChanged', res => { this.emit('focusChanged', res) })
     input.on('input', input => { this.emit('input', input) })
 
-    canvas.addEventListener('contextmenu', e => { this.emit('contextmenu', this.getPos(e)) })
+    canvas.addEventListener('contextmenu', e => {
+      e.position = this.getPos(e)
+      this.emit('contextmenu', e)
+    })
     canvas.addEventListener('wheel', throttle(e => {
       this.wheel(e)
     }, 20))

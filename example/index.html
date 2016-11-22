@@ -42,6 +42,9 @@
     const electron = require('electron');
     const remote = electron.remote;
     const shell = electron.shell;
+    editor.on('contextmenu', function (ev) {
+      console.log(ev.postion)
+    })
     editor.on('error', function(err){ alert(err.message); });
     editor.on('attached', function() {
       if (remote.process.argv.length > 2) {
@@ -62,7 +65,7 @@
     editor.on('change title', title => {
       document.title = title
     })
-    editor.store.on('change icon', icon => {
+    editor.on('change icon', icon => {
       if (icon === '') { return }
       if (process.platform === 'darwin') {
         remote.getCurrentWindow().setRepresentedFilename(icon);
