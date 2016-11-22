@@ -1,0 +1,55 @@
+<dom-module id="neovim-editor">
+  <template>
+    <style>
+      :host {
+        position: relative;
+      }
+      .neovim-wrapper {
+        position: absolute;
+        padding: 0px;
+        margin: 0px;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        overflow: hidden;
+      }
+      .neovim-cursor {
+        padding: 0px;
+        margin: 0px;
+        position: absolute;
+      }
+      .neovim-input {
+        width: 1px;
+        color: transparent;
+        background-color: transparent;
+        padding: 0px;
+        border: 0px;
+        outline: none;
+        vertical-align: middle;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+      }
+      #neovim-composing {
+        color: #fff;
+        z-index: 99999;
+        white-space: pre;
+        position: absolute;
+        left: 0;
+        top: 0;
+        text-decoration: underline;
+        /*bgcolor, font, line-height*/
+      }
+    </style>
+    <div id="neovim-composing"></div>
+    <div class="neovim-wrapper">
+      <canvas class="neovim-canvas" width$="[[width]]" height$="[[height]]"></canvas>
+      <canvas class="neovim-cursor">
+      </canvas>
+      <input class="neovim-input" autocomplete="off" autofocus />
+    </div>
+  </template>
+</dom-module>
+
+<script src="./build/bundle.js"></script>

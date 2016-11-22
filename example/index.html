@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes" />
+    <title>Neoclide client example</title>
+    <script src="../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <link rel="import" href="../bower_components/polymer/polymer.html" />
+    <link rel="import" href="../neovim-editor.html" />
+
+    <style>
+      *, *::before, *::after {
+        box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -webkit-text-size-adjust: none;
+        outline: none;
+      }
+      html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0px;
+        padding: 0px;
+        overflow: hidden;
+      }
+      #neovim {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <neovim-editor id="neovim" font="Source\ Code\ Pro" font-size="14">
+    </neovim-editor>
+  </body>
+  <script>
+    'use strict';
+    const neovim_element = document.getElementById('neovim');
+    const editor = neovim_element.editor;
+    const electron = require('electron');
+    const remote = electron.remote;
+    const shell = electron.shell;
+    editor.on('error', function(err){ alert(err.message); });
+    editor.on('attached', function() {
+      if (remote.process.argv.length > 2) {
+        // It is better to use 'argv' property of <neovim-editor>.
+        editor.setArgv(remote.process.argv.slice(2));
+      }
+      neovim_element.addEventListener('drop', function(e) {
+        e.preventDefault();
+        const f = e.dataTransfer.files[0]
+        if (f) editor.getClient().command('drop ' + f.path)  // 'path' member is Electron extension
+      })
+    })
+    editor.on('quit', () => remote.app.quit())
+
+    editor.on('bell', () => {
+      shell.beep()
+    })
+    editor.on('change title', title => {
+      document.title = title
+    })
+    editor.store.on('change icon', icon => {
+      if (icon === '') { return }
+      if (process.platform === 'darwin') {
+        remote.getCurrentWindow().setRepresentedFilename(icon);
+      }
+    })
+    neovim_element.addEventListener('dragover', e => e.preventDefault());
+  </script>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "neoclide-client",
+  "description": "neovim-client component for neoclide",
+  "version": "0.0.1",
+  "keywords": [
+    "neovim",
+    "polymer",
+    "WebComponent",
+    "Electron",
+    "NW.js",
+    "editor"
+  ],
+  "authors": [
+    "chemzqm <chemzqm@gmail.com>"
+  ],
+  "main": "neovim-editor.html",
+  "license": "MIT",
+  "dependencies": {
+    "polymer": "^1.6.1",
+    "webcomponentsjs": "^0.7.22"
+  }
+}
