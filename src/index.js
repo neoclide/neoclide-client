@@ -17,6 +17,10 @@ Polymer({
       type: Number,
       value: 1.3,
     },
+    opacity: {
+      type: Number,
+      value: 1,
+    },
     nvimCmd: {
       type: String,
       value: 'nvim',
@@ -53,6 +57,7 @@ Polymer({
       this.nvimCmd,
       this.argv,
       {
+        opacity: this.opacity,
         font: this.font,
         fontSize: this.fontSize,
         lineHeight: this.lineHeight,

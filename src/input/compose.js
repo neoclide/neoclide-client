@@ -18,7 +18,7 @@ export default class NeovimCompose extends Emitter {
       font_width,
       font_height,
       font_size,
-      face,
+      font_family,
     } = font_attr
     const arr = bg.substring(bg.indexOf('(') + 1, bg.lastIndexOf(')')).split(/,\s*/)
 
@@ -28,7 +28,7 @@ export default class NeovimCompose extends Emitter {
       color: fg,
       backgroundColor: bg_color,
       fontSize: font_size + 'px',
-      fontFamily: face,
+      fontFamily: font_family,
       lineHeight: font_height + 'px',
       top: Math.floor(line * font_height) + 'px',
       left: col*font_width + 'px',

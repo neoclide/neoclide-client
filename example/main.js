@@ -6,7 +6,9 @@ var BrowserWindow = electron.BrowserWindow
 var index_html = 'file://' + path.join(__dirname, 'index.html')
 
 app.on('ready', function() {
-    BrowserWindow.addDevToolsExtension('/Users/chemzqm/Library/Application Support/Google/Chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.10.2_0')
+    const root = path.join(__dirname, '../extension/redux/2.10.3.1_0')
+    BrowserWindow.addDevToolsExtension(root)
+
     var win = new BrowserWindow({
         width: 800,
         height: 600,
@@ -15,8 +17,8 @@ app.on('ready', function() {
         title: "Neoclide",
         webPreferences: {
           webgl: true,
-          experimentalCanvasFeatures: false,
-          plugins: true
+          experimentalCanvasFeatures: true,
+          plugins: false
         },
         hasShadow: false,
         defaultEncoding: "utf8",

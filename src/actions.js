@@ -1,4 +1,4 @@
-import * as T from '../constants/ActionTypes'
+import * as T from './types'
 
 export const changeTitle = title => ({ type: T.CHANGE_TITLE, title })
 
@@ -68,4 +68,32 @@ export const toggleMouse = mouse => {
 
 export const changeIcon = icon => {
   return {type: T.CHANGE_ICON, icon}
+}
+
+export const changeOpacity = opacity => {
+  return {type: T.CHANGE_OPACITY, opacity}
+}
+
+export const bell = () => {
+  return {type: T.BELL_ACTION}
+}
+
+export const visualBell = () => {
+  return {type: T.VISUAL_BELL_ACTION}
+}
+
+export const scroll = () => {
+  return {type: T.SCROLL_ACTION}
+}
+
+export const eolClear = () => {
+  return {type: T.EOL_CLEAR_ACTION}
+}
+
+export const clear = () => {
+  return {type: T.CLEAR_ACTION}
+}
+
+export const put = () => {
+  return {type: T.PUT_ACTION}
 }

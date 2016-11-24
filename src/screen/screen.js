@@ -9,19 +9,6 @@ export default class NeovimScreen {
   }
 
   /**
-   * resizeWithPixels
-   *
-   * @public
-   * @param {number} width_px
-   * @param {number} height_px
-   */
-  resizeWithPixels(width_px, height_px) {
-    //const {height, width} = this.proxy.font_attr
-    // TODO add resizeImpl back
-    this.resizeImpl()
-  }
-
-  /**
    * scroll for Neovim RPC
    *
    * cols_delta > 0 -> screen up
@@ -107,12 +94,12 @@ export default class NeovimScreen {
       return
     }
 
-    for (const char of chars) {
-      if (!char[0] || char[0] === ' ') {
+    for (const c of chars) {
+      if (!c[0] || c[0] === ' ') {
         x += width
         continue
       }
-      this.ctx.fillText(char.join(''), x, y)
+      this.ctx.fillText(c.join(''), x, y)
       x += width
     }
   }
@@ -125,17 +112,13 @@ export default class NeovimScreen {
    */
   drawText(chars) {
     // Neovim doesn't recognize double width charactors except emoji
-    if (this.warningSign) {
-      this.warningSign = false
-      return
-    }
     const {cursor, font_attr, line_height} = this.proxy
     const {line, col} = cursor
     const {
       fg, bg, sp,
       font_width,
       font_height,
-      face,
+      font_family,
       font_size,
       bold,
       italic,
@@ -144,7 +127,11 @@ export default class NeovimScreen {
     } = font_attr
 
     // Draw background
-    this.drawBlock(line, col, 1, chars.length, bg)
+    if (this.warningSign) {
+      this.warningSign = false
+    } else {
+      this.drawBlock(line, col, 1, chars.length, bg)
+    }
 
     let attrs = ''
     if (bold) {
@@ -153,7 +140,7 @@ export default class NeovimScreen {
     if (italic) {
       attrs += 'italic '
     }
-    this.ctx.font = attrs + font_size + 'px ' + face
+    this.ctx.font = attrs + font_size + 'px ' + font_family
 
     this.ctx.textBaseline = 'top'
     this.ctx.fillStyle = fg
@@ -264,13 +251,14 @@ export default class NeovimScreen {
   }
 
   resizeCanvas(width, height) {
+    if (width == this.width && height == this.height) return
     const r = window.devicePixelRatio || 1
     this.canvas.width = width*r
     this.canvas.height = height*r
     this.canvas.style.width = width + 'px'
     this.canvas.style.height = height + 'px'
     if (r !== 1) {
-      this.ctx.setTransform(r || 1 ,0 ,0 , r || 1 ,0, 0)
+      this.ctx.scale(r, r)
     }
   }
 }

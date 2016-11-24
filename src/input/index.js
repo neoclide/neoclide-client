@@ -5,20 +5,22 @@ import ScreenDrag from './screen-drag'
 import ScreenWheel from './screen-wheel'
 import Compose from './compose'
 import throttle from 'throttleit'
+import debounce from 'debounce'
 
 function checkResize(el, fn) {
   let w
   let h
+  let func = debounce(fn, 200)
   function check() {
     let {width, height} = el.getBoundingClientRect()
     if (w && h && (w !== width || h !== height)) {
-        fn(width, height)
+      func(width, height)
     }
     w = width
     h = height
     setTimeout(() => {
       raf(check)
-    }, 200)
+    }, 100)
   }
   raf(check)
 }
@@ -102,14 +104,6 @@ export default class ClientInput extends Emitter {
     ]
   }
   onResize(width, height) {
-    if (width !== this.canvas.width) {
-      this.canvas.width = width
-      this.canvas.style.width = (width / (window.devicePixelRatio || 1)) + 'px'
-    }
-    if (height !== this.canvas.height) {
-      this.canvas.height = height
-      this.canvas.style.height = (height / (window.devicePixelRatio || 1)) + 'px'
-    }
     this.emit('resize', width, height)
   }
 }

@@ -18,6 +18,7 @@ export default class NeovimCursor extends Emitter {
     Object.assign(el.style, {
       top: '0px',
       left: '0px',
+      display: 'none',
       pointerEvents: 'none'
     })
 
@@ -39,7 +40,6 @@ export default class NeovimCursor extends Emitter {
     })
 
     this.updateSize()
-    this.updateBgColors(proxy.bg_color)
     this.updateCursorBlinking()
   }
 
@@ -49,37 +49,9 @@ export default class NeovimCursor extends Emitter {
     return `rgb(${255 - ms[1]}, ${255 - ms[2]}, ${255 - ms[3]})`
   }
 
-  updateBgColors(bg) {
-    const ms = bg.match(/\((\d+),\s*(\d+),\s*(\d+)/)
-    if (ms) {
-      this.bgColors = {r: ms[1], g: ms[2], b: ms[3]}
-    } else {
-      this.bgColors = {r: 0, g: 0, b: 0}
-    }
-  }
   shouldBlink() {
     const {focused, mode} = this.proxy
     return focused && mode != 'normal'
-  }
-
-  invertColor(image) {
-    const d = image.data
-    const {ime, bgColors} = this
-    for (let i = 0; i < d.length; i+=4) {
-      if (ime && close(d[i], bgColors.r)
-          && close(d[i + 1], bgColors.g)
-          && close(d[i + 2], bgColors.b)) {
-        // yellow color
-        d[i] = 255
-        d[i + 1] = 193
-        d[i + 2] = 7
-      } else {
-        d[i] = 255 - d[i]
-        d[i+1] = 255 - d[i+1]
-        d[i+2] = 255 - d[i+2]
-      }
-    }
-    return image
   }
 
   updateSize() {
@@ -89,7 +61,7 @@ export default class NeovimCursor extends Emitter {
     this.el.style.height = font_height + 'px'
     this.el.width = font_width * r
     this.el.height = font_height * r
-    this.ctx.setTransform(r ,0 ,0 , r, 0, 0)
+    this.ctx.scale(r,r)
     this.redraw()
   }
 
@@ -115,9 +87,11 @@ export default class NeovimCursor extends Emitter {
     const x = col * font_width
     const y = line * font_height
 
-    this.el.style.left = x + 'px'
-    this.el.style.top = y + 'px'
-    log.debug(`Cursor is moved to (${x}, ${y})`)
+    Object.assign(this.el.style, {
+      left: x + 'px',
+      top: y + 'px',
+      display: 'block'
+    })
     this.redraw()
     this.blink_timer.reset()
   }
@@ -135,11 +109,10 @@ export default class NeovimCursor extends Emitter {
     ctx.clearRect(0, 0, this.el.width, this.el.height)
 
     if (mode == 'replace') {
-      const y = font_attr.font_height - window.devicePixelRatio
       ctx.strokeStyle = color
       ctx.beginPath()
-      ctx.moveTo(0, y)
-      ctx.lineTo(font_attr.font_width, y)
+      ctx.moveTo(0, font_height)
+      ctx.lineTo(font_attr.font_width, font_height)
       ctx.stroke()
     } else if (mode == 'normal') {
       const captured = this.screen_ctx.getImageData(x*r, y*r, font_width*r, font_height*r)
@@ -169,4 +142,31 @@ export default class NeovimCursor extends Emitter {
       this.redraw()
     }
   }
+  invertColor(image) {
+    const d = image.data
+    const {ime} = this
+    const {bg_color} = this.proxy
+    const bg = rgbToColors(bg_color)
+    for (let i = 0; i < d.length; i+=4) {
+      if (ime && close(d[i], bg.r)
+          && close(d[i + 1], bg.g)
+          && close(d[i + 2], bg.b)) {
+        // yellow color
+        d[i] = 255
+        d[i + 1] = 193
+        d[i + 2] = 7
+        d[i + 3] = 255
+      } else {
+        d[i] = 255 - d[i]
+        d[i + 1] = 255 - d[i+1]
+        d[i + 2] = 255 - d[i+2]
+      }
+    }
+    return image
+  }
+}
+
+function rgbToColors(color) {
+  const ms = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/)
+  return {r: ms[0], g: ms[1], b: ms[2]}
 }

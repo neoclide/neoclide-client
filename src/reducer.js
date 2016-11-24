@@ -1,4 +1,4 @@
-import * as T from '../constants/ActionTypes'
+import * as T from './types'
 
 const initialState = {
   size: {
@@ -6,8 +6,8 @@ const initialState = {
     cols: 0
   },
   font_attr: {
-    fg: 'white',
-    bg: 'rgba(0,0,0,0.8)',
+    fg: 'rgb(255,255,255)',
+    bg: 'rgb(0,0,0)',
     sp: null,
     bold: false,
     italic: false,
@@ -16,7 +16,7 @@ const initialState = {
     font_width: 7,
     font_height: 14,
     font_size: 14,
-    face: 'monospace'
+    font_family: 'monospace'
 	},
   cursor: {
     line: 0,
@@ -41,8 +41,8 @@ const initialState = {
   cursor_draw_delay: 30,
   blink_cursor: true,
   cursor_blink_interval: 500,
-  opacity: 0.8,
-  bg_color: 'rgba(0,0,0, 0.8)',
+  opacity: 1,
+  bg_color: 'rgb(0,0,0)',
   fg_color: 'rgb(255,255,255)',
   sp_color: 'rgb(255,255,255)'
 }
@@ -66,7 +66,7 @@ export default function neovim(state = initialState, action) {
       const {font_attr} = state
       const obj = calculateDrawBlock(font_size,
           state.line_height,
-          state.font_attr.face)
+          state.font_attr.font_family)
       return Object.assign({}, state, {
         font_attr: {
           ...font_attr,
@@ -78,7 +78,7 @@ export default function neovim(state = initialState, action) {
       const obj = calculateDrawBlock(
         action.fontSize || state.font_attr.font_size,
         action.lineHeight || state.line_height,
-        action.font || state.font_attr.face)
+        action.font || state.font_attr.font_family)
       return Object.assign({}, state, {
         line_height: action.lineHeight || state.line_height,
         font_attr: {
@@ -159,24 +159,23 @@ export default function neovim(state = initialState, action) {
       }
     }
     case T.UPDATE_FG: {
-      const {font_attr} = state
-      const fg_color = colorString(action.color, font_attr.fg)
+      const fg_color = colorString(action.color, state.fg_color)
       return {
         ...state,
         fg_color
       }
     }
     case T.UPDATE_BG: {
-      const {font_attr, opacity} = state
-      const bg_color = action.color < 0 ? 'rgba(0,0,0,0.8)':
-        colorString(action.color, font_attr.bg, opacity)
+      const {opacity} = state
+      const bg_color = colorString(action.color, state.bg_color, opacity)
       return {
         ...state,
         bg_color
       }
     }
     case T.UPDATE_SP: {
-      const sp_color = colorString(action.color, state.fg_color)
+      const {opacity} = state
+      const sp_color = colorString(action.color, state.fg_color, opacity)
       return {
         ...state,
         sp_color
@@ -202,6 +201,18 @@ export default function neovim(state = initialState, action) {
         ...state,
         icon_path: action.icon
       }
+    case T.CHANGE_OPACITY:
+      return {
+        ...state,
+        opacity: action.opacity
+      }
+    case T.BELL_ACTION:
+    case T.VISUAL_BELL_ACTION:
+    case T.SCROLL_ACTION:
+    case T.EOL_CLEAR_ACTION:
+    case T.CLEAR_ACTION:
+    case T.PUT_ACTION:
+      return state
     default:
       return state
   }
@@ -209,10 +220,10 @@ export default function neovim(state = initialState, action) {
 
 export const KEYS = Object.keys(initialState)
 
-function measureText(drawn_px, face) {
+function measureText(drawn_px, font_family) {
   const canvas = document.createElement('canvas')
   const ctx = canvas.getContext('2d')
-  ctx.font = drawn_px + 'px ' + face
+  ctx.font = drawn_px + 'px ' + font_family
   return ctx.measureText('m').width
 }
 
@@ -238,18 +249,35 @@ function calculateDrawBlock(font_size, line_height, font) {
     font_width * 2 :
     font_size *line_height
   )
-  return {font_width, font_height, font_size, face: font}
+  return {font_width, font_height, font_size, font_family: font}
 }
 
 // Note: 0x001203 -> '#001203'
-function colorString(new_color, fallback, opacity = 1) {
-  if (typeof new_color !== 'number' || new_color < 0) {
-    return fallback
+function colorString(color, fallback, opacity = 1) {
+  if (typeof color !== 'number' || color < 0) {
+    return toOpacity(fallback, opacity)
   }
+  return toOpacity(color, opacity)
+}
 
-  var r = (new_color >> 16) & 255
-  var g = (new_color >> 8) & 255
-  var b = new_color & 255
-
+function toOpacity(color, opacity = 1) {
+  let r, g, b
+  if (typeof color == 'number') {
+    r = (color >> 16) & 255
+    g = (color >> 8) & 255
+    b = color & 255
+  } else if (/^#/.test(color)) {
+    let ms = color.match(/(\w{2})(\w{2})(\w{2})/)
+    r = parseInt(ms[1], 16)
+    g = parseInt(ms[2], 16)
+    b = parseInt(ms[3], 16)
+  } else if (/^rgb/.test(color)) {
+    const ms = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/)
+    r = ms[0]
+    g = ms[1]
+    b = ms[2]
+  } else {
+    throw new Error(`Unknown color ${color}`)
+  }
   return `rgba(${r}, ${g}, ${b}, ${opacity})`
 }

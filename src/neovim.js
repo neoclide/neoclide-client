@@ -20,7 +20,7 @@ export default class Neovim extends Emitter {
     // use state for readonly state
     Object.defineProperty(this, 'state', {
       get: function () {
-        return Object.freeze(store.getState().neovim)
+        return Object.freeze(store.getState())
       }
     })
     store.dispatch(A.setFontAttrs({
@@ -35,6 +35,7 @@ export default class Neovim extends Emitter {
       cursor_blink_interval: attrs.cursorBlinkInterval
     }))
     store.dispatch(A.changeTitle(attrs.windowTitle))
+    store.dispatch(A.changeOpacity(attrs.opacity))
 
     this.cmdlineIM = null
     const input = this.clientInput = new ClientInput(root, proxy)
@@ -118,6 +119,7 @@ export default class Neovim extends Emitter {
     })
     // bind actions
     p.on('put', chars => {
+      store.dispatch(A.put())
       screen.drawText(chars)
       const {cursor} = proxy
       const line = cursor.line
@@ -125,13 +127,16 @@ export default class Neovim extends Emitter {
       store.dispatch(A.moveCursor(line, col))
     })
     p.on('clear', () => {
+      store.dispatch(A.clear())
       screen.clearAll()
       store.dispatch(A.moveCursor(0, 0))
     })
     p.on('eol_clear', () => {
+      store.dispatch(A.eolClear())
       screen.clearEol()
     })
     p.on('scroll', cols_delta => {
+      store.dispatch(A.scroll())
       screen.scroll(cols_delta)
     })
     p.on('resize', (cols, lines) => {
@@ -142,15 +147,19 @@ export default class Neovim extends Emitter {
       }
     })
     p.on('bell', () => {
+      store.dispatch(A.bell())
       this.emit('bell')
     })
     p.on('visual_bell', () => {
+      store.dispatch(A.visualBell())
       this.emit('visual-bell')
     })
     p.on('set_title', title => {
+      store.dispatch(A.changeTitle(title))
       this.emit('change title', title)
     })
     p.on('set_icon', icon => {
+      store.dispatch(A.changeIcon(icon))
       this.emit('change icon', icon)
     })
   }
@@ -190,7 +199,6 @@ export default class Neovim extends Emitter {
       cursor,
       bg_color,
       fg_color,
-      font_attr,
       busy,
       focused,
       mode
@@ -198,6 +206,7 @@ export default class Neovim extends Emitter {
 
     const input = this.root.querySelector('.neovim-input')
     store.subscribe(() => {
+      // cursor position change
       if (proxy.cursor !== cursor) {
         cursor = proxy.cursor
         const {font_width, font_height} = proxy.font_attr
@@ -208,10 +217,10 @@ export default class Neovim extends Emitter {
         this.cursor.updateCursorPos()
         this.emit('change cursor', cursor)
       }
-      // cursor position change
+      // background color change
       if (proxy.bg_color !== bg_color) {
         bg_color = proxy.bg_color
-        this.cursor.updateBgColors(bg_color)
+        this.cursor.redraw()
         this.emit('change bg_color', bg_color)
       }
       // foreground color change
@@ -219,12 +228,6 @@ export default class Neovim extends Emitter {
         fg_color = proxy.fg_color
         this.cursor.redraw()
         this.emit('change fg_color', fg_color)
-      }
-      // font attribute change
-      if (proxy.font_attr !== font_attr) {
-        font_attr = proxy.font_attr
-        this.cursor.updateSize()
-        this.emit('change font_attr', font_attr)
       }
       // busy change
       if (proxy.busy !== busy) {

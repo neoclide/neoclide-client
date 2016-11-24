@@ -75,7 +75,6 @@ cosnt editor = el.editor
 * `change cursor` fired with new cursor position
 * `change bg_color` fired with new bg_color (rgba or rgb format)
 * `change fg_color` fired with new fg_color (rgba or rgb format)
-* `change font_attr` fired with new font attributes
 * `change busy` fired with busy (true of false)
 * `change focused` fired with focused (true of false)
 * `change mode` fired with new mode (`command` or `insert`, need patch neovim to support `cmdline`)
