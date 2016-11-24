@@ -1,5 +1,5 @@
 import Emitter from 'emitter'
-import log from '../log'
+import * as util from '../util'
 import CursorBlinkTimer from './timer'
 
 function close(a, b) {
@@ -32,21 +32,12 @@ export default class NeovimCursor extends Emitter {
       }
     })
 
-    // srote current input method
-    this.ime = window.keyboardLayout && window.keyboardLayout != 'com.apple.keylayout.US'
-    window.addEventListener('layoutChange', e => {
-      this.ime = e.detail !== 'com.apple.keylayout.US'
-      this.redraw()
-    })
-
     this.updateSize()
     this.updateCursorBlinking()
-  }
 
-  borderColor(bg) {
-    const ms = bg.match(/\((\d+),\s*(\d+),\s*(\d+)/)
-    if (!ms) return '#ffffff'
-    return `rgb(${255 - ms[1]}, ${255 - ms[2]}, ${255 - ms[3]})`
+    window.addEventListener('layoutChange', () => {
+      this.redraw()
+    })
   }
 
   shouldBlink() {
@@ -57,9 +48,9 @@ export default class NeovimCursor extends Emitter {
   updateSize() {
     const {font_width, font_height} = this.proxy.font_attr
     const r = window.devicePixelRatio || 1
-    this.el.style.width = font_width + 'px'
+    this.el.style.width = font_width * 2 + 'px'
     this.el.style.height = font_height + 'px'
-    this.el.width = font_width * r
+    this.el.width = font_width * 2 * r
     this.el.height = font_height * r
     this.ctx.scale(r,r)
     this.redraw()
@@ -104,8 +95,8 @@ export default class NeovimCursor extends Emitter {
     const {font_width, font_height} = font_attr
     const x = cursor.col * font_attr.font_width
     const y = cursor.line * font_attr.font_height
+    const color = util.imeRunning() ? 'rgb(255,193,7)' : '#ffffff'
 
-    const color = this.borderColor(font_attr.bg)
     ctx.clearRect(0, 0, this.el.width, this.el.height)
 
     if (mode == 'replace') {
@@ -144,7 +135,7 @@ export default class NeovimCursor extends Emitter {
   }
   invertColor(image) {
     const d = image.data
-    const {ime} = this
+    const ime = util.imeRunning()
     const {bg_color} = this.proxy
     const bg = rgbToColors(bg_color)
     for (let i = 0; i < d.length; i+=4) {

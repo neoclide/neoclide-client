@@ -1,4 +1,5 @@
 import * as T from './types'
+import {toOpacity} from './util'
 
 const initialState = {
   size: {
@@ -258,26 +259,4 @@ function colorString(color, fallback, opacity = 1) {
     return toOpacity(fallback, opacity)
   }
   return toOpacity(color, opacity)
-}
-
-function toOpacity(color, opacity = 1) {
-  let r, g, b
-  if (typeof color == 'number') {
-    r = (color >> 16) & 255
-    g = (color >> 8) & 255
-    b = color & 255
-  } else if (/^#/.test(color)) {
-    let ms = color.match(/(\w{2})(\w{2})(\w{2})/)
-    r = parseInt(ms[1], 16)
-    g = parseInt(ms[2], 16)
-    b = parseInt(ms[3], 16)
-  } else if (/^rgb/.test(color)) {
-    const ms = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/)
-    r = ms[0]
-    g = ms[1]
-    b = ms[2]
-  } else {
-    throw new Error(`Unknown color ${color}`)
-  }
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`
 }

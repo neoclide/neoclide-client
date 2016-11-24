@@ -92,8 +92,8 @@ export default class Neovim extends Emitter {
     p.on('mode_change', mode => {
       const {searching} = proxy
       const curMode = proxy.mode
-      if (mode == 'cmdline') {
-        if (searching) util.saveCommandIm()
+      if (mode != 'cmdline' && searching) {
+        util.saveCommandIm()
         store.dispatch(A.toggleSearch(false))
       }
       if (curMode != 'insert' && mode == 'normal') {

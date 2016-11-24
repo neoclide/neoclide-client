@@ -31,6 +31,9 @@ module.exports = {
   },
   target: 'electron',
   externals: {
+    /*做为 commonjs 模块载入*/
+    'keyboard-layout': "commonjs keyboard-layout",
+    'imselect': "commonjs imselect",
     polymer: 'Polymer'
   },
   module: {
