@@ -167,11 +167,6 @@ export default class Neovim extends Emitter {
       this.emit('change icon', icon)
     })
   }
-  selectCommandIm() {
-    if (this.cmdlineIM && window.imselect) {
-      window.imselect.selectMethod(this.cmdlineIM)
-    }
-  }
   attachCanvas(canvas, width, height) {
     store.dispatch(A.changeSize(width, height))
 

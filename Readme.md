@@ -14,7 +14,10 @@ reason about.
 
 [node.js](https://nodejs.org) is need, just run:
 
-    npm run install
+    npm install neoclide-client
+
+Some native modules is used, since it's build for electron, `electron-rebuild`
+need to be run after install or electron get upgraded.
 
 ## Data flow
 
@@ -22,7 +25,7 @@ reason about.
 
 ## Usage
 
-Include webcomponent, polymer and neovim-editor  to html page and `neovim-editor` tag.
+Include webcomponent, polymer and neovim-editor to html page and `neovim-editor` tag.
 
 ``` html
 <script src="../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
@@ -34,11 +37,14 @@ Include webcomponent, polymer and neovim-editor  to html page and `neovim-editor
 
 See detailed in `example/index.html`
 
-You can run the example by using `node example/cli.js` after installation.
+You can run the example by using `node example/cli.js` after clone the repo and
+electron-rebuild.
 
 ## Configuration
 
-`neovim-editor` have some properties which allowed to specify how neovim-editor works before attched.
+`neovim-editor` have some properties which allows specify how neovim-editor works before attched.
+
+None of them are required.
 
 * `font-size`: font size for rendering, default `14`
 * `font`: font family for rendering, default `monospace`
