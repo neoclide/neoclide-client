@@ -263,16 +263,20 @@ export default class NeovimInput extends Emitter {
   // Note:
   // Assumes keydown event is always fired before input event
   onKeydown(event) {
-    const {ctrlKey, altKey, keyCode, metaKey} = event
+    const {ctrlKey, altKey, metaKey, key} = event
     const {mode, alt_key_disabled} = this.proxy
+
+    if (mode == 'normal' && (key == '/' || key == '?'))  {
+      this.emit('startSearch')
+    }
 
     if (mode == 'normal' && imeRunning() &&
       !ctrlKey &&
       !metaKey &&
       !altKey &&
-      event.key !== 'Alt' &&
-      event.key !== 'Shift' &&
-      event.key !== 'Meta') {
+      key !== 'Alt' &&
+      key !== 'Shift' &&
+      key !== 'Meta') {
       event.preventDefault()
       if (['a', 'A', 'i', 'I', 'o', 'O'].indexOf(event.key) === -1) {
         setTimeout(() => defaultIM(), 16)
@@ -282,10 +286,6 @@ export default class NeovimInput extends Emitter {
     }
 
     if (metaKey || this.ime_running) return
-
-    if (mode == 'normal' && keyCode == 191)  {
-      this.emit('startSearch')
-    }
 
     const special_sequence = NeovimInput.getVimSpecialCharInput(event)
 
