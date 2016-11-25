@@ -31,6 +31,8 @@ export default class Neovim extends Emitter {
     store.dispatch(A.setInputOptions({
       alt_key_disabled: attrs.disableAltKey,
       meta_key_disabled: attrs.disableMetaKey,
+      cursor_fgcolor: attrs.cursorFgcolor,
+      cursor_bgcolor: attrs.cursorBgcolor,
       cursor_draw_delay: attrs.cursorDrawDelay,
       cursor_blink_interval: attrs.cursorBlinkInterval
     }))
@@ -52,11 +54,13 @@ export default class Neovim extends Emitter {
       this.process.input(chars)
     })
     input.on('resize', (width, height) => {
-      if (this.screen) this.screen.resizeCanvas(width, height)
-      //const {size} = proxy
       store.dispatch(A.changeSize(width, height))
       const {cols, lines} = proxy.size
+      this.screen.lines.resize(lines, cols)
       this.process.tryResize(cols, lines)
+      this.process.once('resize', () => {
+        this.screen.resizeCanvas(width, height)
+      })
     })
     input.on('focusChanged', focused => {
       if (focused && proxy.mode == 'normal') util.defaultIM()
@@ -176,7 +180,7 @@ export default class Neovim extends Emitter {
     this.screen.resizeCanvas(width, height)
 
     const cursorEl = this.root.querySelector('.neovim-cursor')
-    this.cursor = new NeovimCursor(cursorEl, this.screen.ctx, proxy)
+    this.cursor = new NeovimCursor(cursorEl, this.screen, proxy)
 
     this.bindProcess()
 

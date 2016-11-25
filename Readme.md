@@ -37,18 +37,20 @@ You can run the example by using `node example/cli.js` after installation.
 
 `neovim-editor` have some properties which allowed to specify how neovim-editor works before attched.
 
-* `fontSize`: font size for rendering, default `14`
+* `font-size`: font size for rendering, default `14`
 * `font`: font family for rendering, default `monospace`
-* `lineHeight`: line height for rendering, default `1.3`
-* `nvimCmd`: command start neovim default `nvim`
+* `line-height`: line height for rendering, default `1.3`
+* `nvim-cmd`: command start neovim default `nvim`
 * `argv`: argument list add to nvimCmd, default `[]`
-* `disableAltKey`: default `false`
-* `disableMetaKey`: default `false`
-* `cursorDrawDelay`: delay for redrawing cursor default `10`
-* `windowTitle`: default `Neovim`
-* `onProcessAttached`: optional callback function on editor attached
-* `onQuit`: optional callback function on editor quit
-* `onError`: optional callback function on editor error
+* `disable-alt-key`: default `false`
+* `disable-meta-key`: default `true`
+* `cursor-draw-delay`: delay for redrawing cursor default `10`
+* `window-title`: default `Neovim`
+* `on-process-attached`: optional callback function on editor attached
+* `on-quit`: optional callback function on editor quit
+* `on-error`: optional callback function on editor error
+* `cursor-fgcolor`: font color of cursor, default `#000000`
+* `cursor-bgcolor`: background color of cursor, default `#ffffff`
 
 ## Editor events
 

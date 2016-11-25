@@ -1,4 +1,5 @@
 import log from '../log'
+import Lines from './lines'
 
 export default class NeovimScreen {
   constructor(canvas, proxy) {
@@ -6,20 +7,22 @@ export default class NeovimScreen {
     this.canvas = canvas
     this.proxy = proxy
     this.ctx = this.canvas.getContext('2d', {alpha: true})
+    const {size} = proxy
+    this.lines = new Lines(size.lines, size.cols)
   }
 
   /**
    * scroll for Neovim RPC
    *
-   * cols_delta > 0 -> screen up
-   * cols_delta < 0 -> screen down @public
-   * @param {} cols_delta
+   * delta > 0 -> screen up
+   * delta < 0 -> screen down @public
+   * @param {} delta
    */
-  scroll(cols_delta) {
-    if (cols_delta > 0) {
-      this.scrollUp(cols_delta)
-    } else if (cols_delta < 0) {
-      this.scrollDown(-cols_delta)
+  scroll(delta) {
+    if (delta > 0) {
+      this.scrollUp(delta)
+    } else if (delta < 0) {
+      this.scrollDown(-delta)
     }
   }
 
@@ -33,6 +36,7 @@ export default class NeovimScreen {
     this.ctx.clearRect(0, 0, width, height)
     this.ctx.fillStyle = this.proxy.bg_color
     this.ctx.fillRect(0, 0, width, height)
+    this.lines.clearAll()
   }
 
   /**
@@ -46,6 +50,7 @@ export default class NeovimScreen {
     const clear_length = (size.cols - col) * font_attr.font_width
     log.debug(`Clear until EOL: ${line}:${col} length=${clear_length}`)
     this.drawBlock(line, col, 1, clear_length, bg_color)
+    this.lines.clearEol(line, col)
   }
 
   /**
@@ -152,6 +157,7 @@ export default class NeovimScreen {
     const y = Math.floor(line * font_height + margin)
     const x = col * font_width
     this.drawChars(x, y, chars, font_width)
+    this.lines.putChars(line, col, chars.map(a => a[0]))
     this.ctx.lineWidth = window.devicePixelRatio || 1
     if (undercurl) {
       this.ctx.strokeStyle = sp || this.proxy.sp_color || fg // Note: Fallback for Neovim 0.1.4 or earlier.
@@ -214,44 +220,45 @@ export default class NeovimScreen {
     )
   }
 
-  scrollUp(cols_up) {
+  scrollUp(lines_up) {
     const {scroll_region, bg_color} = this.proxy
     const {top, bottom, left, right} = scroll_region
+    this.lines.scrollUp(lines_up, top, bottom, left, right)
     this.slideVertical(
-      top + cols_up,
-      bottom - (top + cols_up) + 1,
+      top + lines_up,
+      bottom - (top + lines_up) + 1,
       top
     )
     this.drawBlock(
-      bottom - cols_up + 1,
+      bottom - lines_up + 1,
       left,
-      cols_up,
+      lines_up,
       right - left + 1,
       bg_color
     )
-    log.debug('Scroll up: ' + cols_up, scroll_region)
+    log.debug('Scroll up: ' + lines_up, scroll_region)
   }
 
-  scrollDown(cols_down) {
+  scrollDown(lines_down) {
     const {scroll_region, bg_color} = this.proxy
     const {top, bottom, left, right} = scroll_region
+    this.lines.scrollDown(lines_down, top, bottom, left, right)
     this.slideVertical(
       top,
-      bottom - (top + cols_down) + 1,
-      top + cols_down
+      bottom - (top + lines_down) + 1,
+      top + lines_down
     )
     this.drawBlock(
       top,
       left,
-      cols_down,
+      lines_down,
       right - left + 1,
       bg_color
     )
-    log.debug('Scroll down: ' + cols_down, scroll_region)
+    log.debug('Scroll down: ' + lines_down, scroll_region)
   }
 
   resizeCanvas(width, height) {
-    if (width == this.width && height == this.height) return
     const r = window.devicePixelRatio || 1
     this.canvas.width = width*r
     this.canvas.height = height*r

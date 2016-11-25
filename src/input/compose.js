@@ -1,4 +1,5 @@
 import Emitter from 'emitter'
+import {toOpacity} from '../util'
 
 export default class NeovimCompose extends Emitter {
   constructor(el, proxy) {
@@ -9,24 +10,20 @@ export default class NeovimCompose extends Emitter {
     this.startColumn = 0
   }
   start() {
-    const {cursor, font_attr} = this.proxy
+    const {cursor, font_attr, fg_color, bg_color} = this.proxy
     const col = this.startColumn = cursor.col
     const line = this.startLine = cursor.line
 
     const {
-      fg, bg,
       font_width,
       font_height,
       font_size,
-      font_family,
+      font_family
     } = font_attr
-    const arr = bg.substring(bg.indexOf('(') + 1, bg.lastIndexOf(')')).split(/,\s*/)
-
-    const bg_color = `rgb(${arr[0]}, ${arr[1]}, ${arr[2]})`
 
     Object.assign(this.el.style, {
-      color: fg,
-      backgroundColor: bg_color,
+      color: toOpacity(fg_color),
+      backgroundColor: toOpacity(bg_color),
       fontSize: font_size + 'px',
       fontFamily: font_family,
       lineHeight: font_height + 'px',

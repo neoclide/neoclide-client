@@ -21,6 +21,12 @@ Polymer({
       type: Number,
       value: 1,
     },
+    cursorFgcolor: {
+      type: String
+    },
+    cursorBgcolor: {
+      type: String
+    },
     nvimCmd: {
       type: String,
       value: 'nvim',
@@ -64,7 +70,9 @@ Polymer({
         disableAltKey: this.disableAltKey,
         disableMetaKey: this.disableMetaKey,
         cursorDrawDelay: this.cursorDrawDelay,
-        windowTitle: this.windowTitle
+        windowTitle: this.windowTitle,
+        cursorFgcolor: this.cursorFgcolor,
+        cursorBgcolor: this.cursorBgcolor
       }
     )
 

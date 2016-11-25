@@ -34,7 +34,7 @@ const initialState = {
   mouse_enabled: true,
   title: '',
   icon_path: '',
-  focused: true,
+  focused: false,
   searching: false,
   line_height: 1.2,
   alt_key_disabled: false,
@@ -42,6 +42,8 @@ const initialState = {
   cursor_draw_delay: 30,
   blink_cursor: true,
   cursor_blink_interval: 500,
+  cursor_fgcolor: '#000000',
+  cursor_bgcolor: '#ffffff',
   opacity: 1,
   bg_color: 'rgb(0,0,0)',
   fg_color: 'rgb(255,255,255)',
@@ -91,10 +93,12 @@ export default function neovim(state = initialState, action) {
     case T.SET_INPUT_OPTIONS: {
       return {
         ...state,
-        alt_key_disabled: action.disableAltKey,
-        meta_key_disabled: action.disableMetaKey,
-        cursor_draw_delay: action.cursorDrawDelay == null ? state.cursor_draw_delay : action.cursorDrawDelay,
-        cursor_blink_interval: action.cursorBlinkInterval || state.cursor_blink_interval
+        cursor_fgcolor: action.cursor_fgcolor || state.cursor_fgcolor,
+        cursor_bgcolor: action.cursor_bgcolor || state.cursor_bgcolor,
+        alt_key_disabled: action.alt_key_disabled,
+        meta_key_disabled: action.meta_key_disabled,
+        cursor_draw_delay: action.cursor_draw_delay == null ? state.cursor_draw_delay : action.cursor_draw_delay,
+        cursor_blink_interval: action.cursor_blink_interval || state.cursor_blink_interval
       }
     }
     case T.CHANGE_SIZE: {

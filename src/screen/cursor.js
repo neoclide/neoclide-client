@@ -2,15 +2,11 @@ import Emitter from 'emitter'
 import * as util from '../util'
 import CursorBlinkTimer from './timer'
 
-function close(a, b) {
-  return Math.abs(a - b) < 2
-}
-
 export default class NeovimCursor extends Emitter {
-  constructor(el, screen_ctx, proxy) {
+  constructor(el, screen, proxy) {
     super()
     this.proxy = proxy
-    this.screen_ctx = screen_ctx
+    this.screen = screen
     this.delay_timer = null
 
     this.blink_timer = new CursorBlinkTimer(proxy.cursor_blink_interval)
@@ -83,37 +79,41 @@ export default class NeovimCursor extends Emitter {
       top: y + 'px',
       display: 'block'
     })
+    this.clear()
     this.redraw()
     this.blink_timer.reset()
   }
 
   redrawImpl() {
     this.delay_timer = null
-    const r = window.devicePixelRatio || 1
     const {ctx} = this
-    const {focused, mode, font_attr, cursor} = this.proxy
-    const {font_width, font_height} = font_attr
-    const x = cursor.col * font_attr.font_width
-    const y = cursor.line * font_attr.font_height
-    const color = util.imeRunning() ? 'rgb(255,193,7)' : '#ffffff'
+    ctx.font = this.screen.ctx.font
+    ctx.textBaseline = 'top'
+    const {focused, mode, font_attr, cursor,
+          cursor_fgcolor, cursor_bgcolor} = this.proxy
+    const {font_height} = font_attr
+    const {line, col} = cursor
+    const color = util.imeRunning() ? 'rgb(255,193,7)' : cursor_bgcolor
+    const ch = this.screen.lines.getCharAt(line, col)
+    const width = ctx.measureText(ch || ' ').width
 
-    ctx.clearRect(0, 0, this.el.width, this.el.height)
+    this.clear()
 
     if (mode == 'replace') {
       ctx.strokeStyle = color
       ctx.beginPath()
       ctx.moveTo(0, font_height)
-      ctx.lineTo(font_attr.font_width, font_height)
+      ctx.lineTo(width, font_height)
       ctx.stroke()
     } else if (mode == 'normal') {
-      const captured = this.screen_ctx.getImageData(x*r, y*r, font_width*r, font_height*r)
       if (focused) {
-        ctx.putImageData(this.invertColor(captured), 0, 0)
+        ctx.fillStyle = color
+        ctx.fillRect(0, 0, width, font_height)
+        ctx.fillStyle = cursor_fgcolor
+        ctx.fillText(ch, 0, 0)
       } else {
-        // show border if not focused on normal mode
-        ctx.putImageData(captured, 0, 0)
         ctx.strokeStyle = color
-        ctx.strokeRect(0, 0, font_attr.font_width - 2, font_attr.font_height)
+        ctx.strokeRect(0, 0, width, font_attr.font_height)
       }
     } else if (mode == 'insert' || mode == 'cmdline') {
       ctx.strokeStyle = color
@@ -122,6 +122,10 @@ export default class NeovimCursor extends Emitter {
       ctx.lineTo(0, font_attr.font_height)
       ctx.stroke()
     }
+  }
+
+  clear() {
+    this.ctx.clearRect(0, 0, this.el.width, this.el.height)
   }
 
   updateCursorBlinking() {
@@ -133,31 +137,4 @@ export default class NeovimCursor extends Emitter {
       this.redraw()
     }
   }
-  invertColor(image) {
-    const d = image.data
-    const ime = util.imeRunning()
-    const {bg_color} = this.proxy
-    const bg = rgbToColors(bg_color)
-    for (let i = 0; i < d.length; i+=4) {
-      if (ime && close(d[i], bg.r)
-          && close(d[i + 1], bg.g)
-          && close(d[i + 2], bg.b)) {
-        // yellow color
-        d[i] = 255
-        d[i + 1] = 193
-        d[i + 2] = 7
-        d[i + 3] = 255
-      } else {
-        d[i] = 255 - d[i]
-        d[i + 1] = 255 - d[i+1]
-        d[i + 2] = 255 - d[i+2]
-      }
-    }
-    return image
-  }
-}
-
-function rgbToColors(color) {
-  const ms = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/)
-  return {r: ms[0], g: ms[1], b: ms[2]}
 }
