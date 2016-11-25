@@ -1,5 +1,6 @@
 import Emitter from 'emitter'
 import log from '../log'
+import {imeRunning, defaultIM} from '../util'
 
 const OnDarwin = global.process.platform === 'darwin'
 const IsAlpha = /^[a-zA-Z]$/
@@ -265,6 +266,21 @@ export default class NeovimInput extends Emitter {
     const {ctrlKey, altKey, keyCode, metaKey} = event
     const {mode, alt_key_disabled} = this.proxy
 
+    if (mode == 'normal' && imeRunning() &&
+      !ctrlKey &&
+      !metaKey &&
+      !altKey &&
+      event.key !== 'Alt' &&
+      event.key !== 'Shift' &&
+      event.key !== 'Meta') {
+      event.preventDefault()
+      if (['a', 'A', 'i', 'I', 'o', 'O'].indexOf(event.key) === -1) {
+        setTimeout(() => defaultIM(), 16)
+      }
+      this.inputToNeovim(event.key, event)
+      return
+    }
+
     if (metaKey || this.ime_running) return
 
     if (mode == 'normal' && keyCode == 191)  {
@@ -272,6 +288,7 @@ export default class NeovimInput extends Emitter {
     }
 
     const special_sequence = NeovimInput.getVimSpecialCharInput(event)
+
     if (special_sequence) {
       this.inputToNeovim(special_sequence, event)
       return
