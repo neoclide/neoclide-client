@@ -1,6 +1,6 @@
 {
   "name": "neoclide-client",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Neovim-client UI component for neoclide",
   "main": "example/main.js",
   "repository": {
