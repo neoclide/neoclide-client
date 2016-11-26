@@ -10,11 +10,14 @@ export const NODE_ENV = (() => {
 
 let LogLevel = 'info'
 
-if (NODE_ENV === 'production') {
-  LogLevel = 'warn'
-} else if (NODE_ENV === 'debug') {
-  LogLevel = 'debug'
+if (process.env.NODE_ENV !== 'production'){
+  if (NODE_ENV === 'production') {
+    LogLevel = 'warn'
+  } else if (NODE_ENV === 'debug') {
+    LogLevel = 'debug'
+  }
 }
+
 log.setLevel(LogLevel)
 
 export default log
