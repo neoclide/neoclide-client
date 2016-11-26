@@ -193,7 +193,6 @@ export default class Neovim extends Emitter {
   }
 
   watch() {
-    let state = proxy.state
     let {
       cursor,
       bg_color,
@@ -201,7 +200,7 @@ export default class Neovim extends Emitter {
       busy,
       focused,
       mode
-      } = state
+      } = proxy.state
 
     const input = this.root.querySelector('.neovim-input')
     store.subscribe(() => {
