@@ -107,9 +107,16 @@ export default function neovim(state = initialState, action) {
       const {size} = state
       const lines = Math.floor(height/font_height)
       const cols = Math.floor(width/font_width)
+      const scroll_region = {
+        top: 0,
+        left: 0,
+        right: cols - 1,
+        bottom: lines - 1
+      }
       if (lines == size.lines && cols == size.cols) return state
       return {
         ...state,
+        scroll_region,
         size: {
           lines,
           cols
