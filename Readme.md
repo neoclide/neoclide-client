@@ -1,7 +1,5 @@
 # Neoclide-client
 
-** WOKR IN PROGRESS**
-
 **Neoclide-client** is a redesigned UI component of [neovim-component](https://github.com/rhysd/neovim-component).
 
 Besides many bugs fixed, neoclide-client introduce uniformed data flow specified for neovim to make the UI easy to
@@ -9,6 +7,13 @@ reason about.
 
 **Note** some features relies on [electron](https://github.com/electron/electron) to work.
 
+## Features
+
+* Background transparent support
+* Improved input method support (need to run electron-rebuild)
+* More friendly cursor support, without antialias issue
+* Accessable editor state object
+* Automatic resize handler, no screen blink
 
 ## Install
 
