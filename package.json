@@ -34,10 +34,10 @@
     "component-emitter": "^1.2.1",
     "component-raf": "^1.2.0",
     "debounce": "^1.0.0",
-    "keyboard-layout": "^2.0.7",
     "imselect": "^1.0.1",
+    "keyboard-layout": "^2.0.7",
     "loglevel": "^1.4.1",
-    "promised-neovim-client": "^2.0.2",
+    "promised-neovim-client": "github:chemzqm/promised-neovim-client#promisified",
     "redux": "^3.6.0",
     "throttleit": "^1.0.0"
   },

@@ -21,8 +21,7 @@ reason about.
 
     npm install neoclide-client
 
-Some native modules is used, since it's build for electron, `electron-rebuild`
-need to be run after install or electron get upgraded.
+Some native modules is used, since it's build for electron, `electron-rebuild` need to be run after install or electron get upgraded.
 
 ## Data flow
 
@@ -65,6 +64,7 @@ None of them are required.
 * `on-error`: optional callback function on editor error
 * `cursor-fgcolor`: font color of cursor, default `#000000`
 * `cursor-bgcolor`: background color of cursor, default `#ffffff`
+* `popupmenu-external`: set to true to enable popupmenu-external (only exists on neovim 0.2.0)
 
 ## Editor events
 
@@ -94,6 +94,14 @@ cosnt editor = el.editor
 * `change busy` fired with busy (true of false)
 * `change focused` fired with focused (true of false)
 * `change mode` fired with new mode (`command` or `insert`, need patch neovim to support `cmdline`)
+* `menu_show` emitted on popupmenu is shown with info object, which contains:
+  * `activeIndex` current active index, could be -1 when no active item
+  * `cols` column number of start position on screen
+  * `lines` line number of start position on screen
+  * `items` contains complete items, each items contains `word`, `kind`, `info` and `menu` as string, see `:h complete-items`
+* `menu_change` emitted with active index on complete change
+* `menu_hide` emitted on complete menu hide
+
 
 
 ## Editor API

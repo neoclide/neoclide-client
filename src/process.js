@@ -22,7 +22,7 @@ export default class NeovimProcess extends Emitter {
     this._actions = []
   }
 
-  attach(lines, columns) {
+  attach(lines, columns, external_popup) {
     this.client = null
 
     this.neovim_process = child_process.spawn(
@@ -40,13 +40,16 @@ export default class NeovimProcess extends Emitter {
           nvim.on('request', this.onRequested.bind(this))
           nvim.on('notification', this.onNotified.bind(this))
           nvim.on('disconnect', this.onDisconnected.bind(this))
-          nvim.uiAttach(columns, lines, true, true /*notify*/)
+          nvim.uiAttach(columns, lines, {
+            rgb: true,
+            popupmenu_external: external_popup
+          }, true /*notify*/)
           log.info(`nvim attached: ${this.neovim_process.pid} ${lines}x${columns} ${JSON.stringify(this.argv)}`)
           this.started = true
 
-          setTimeout(() => {
+          setImmediate(() => {
             this.client.command('silent doautocmd <nomodeline> GUIEnter')
-          }, 0)
+          })
           resolve(nvim)
         }, reject)
     })
@@ -167,6 +170,28 @@ export default class NeovimProcess extends Emitter {
           break
         case 'set_icon':
           this.emit('set_icon', args[0])
+          break
+        case 'popupmenu_show': {
+          this.emit('menu_show', {
+            items: args[0].map(o => {
+              return {
+                word: o[0],
+                kind: o[1],
+                menu: o[2],
+                info: o[3]
+              }
+            }),
+            activeIndex: args[1],
+            lines: args[2],
+            cols: args[3]
+          })
+          break
+        }
+        case 'popupmenu_select':
+          this.emit('menu_select', args[0])
+          break
+        case 'popupmenu_hide': 
+          this.emit('menu_hide')
           break
         default:
           console.warn('Unhandled event: ' + name, args)

@@ -18,7 +18,7 @@ const initialState = {
     font_height: 14,
     font_size: 14,
     font_family: 'monospace'
-	},
+  },
   cursor: {
     line: 0,
     col: 0
@@ -41,6 +41,7 @@ const initialState = {
   meta_key_disabled: true,
   cursor_draw_delay: 30,
   blink_cursor: true,
+  popupmenu_external: false,
   cursor_blink_interval: 500,
   cursor_fgcolor: '#000000',
   cursor_bgcolor: '#ffffff',
@@ -93,6 +94,7 @@ export default function neovim(state = initialState, action) {
     case T.SET_INPUT_OPTIONS: {
       return {
         ...state,
+        popupmenu_external: action.popupmenu_external,
         cursor_fgcolor: action.cursor_fgcolor || state.cursor_fgcolor,
         cursor_bgcolor: action.cursor_bgcolor || state.cursor_bgcolor,
         alt_key_disabled: action.alt_key_disabled,

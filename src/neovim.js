@@ -34,7 +34,8 @@ export default class Neovim extends Emitter {
       cursor_fgcolor: attrs.cursorFgcolor,
       cursor_bgcolor: attrs.cursorBgcolor,
       cursor_draw_delay: attrs.cursorDrawDelay,
-      cursor_blink_interval: attrs.cursorBlinkInterval
+      cursor_blink_interval: attrs.cursorBlinkInterval,
+      popupmenu_external: attrs.popupmenuExternal
     }))
     store.dispatch(A.changeTitle(attrs.windowTitle))
     store.dispatch(A.changeOpacity(attrs.opacity))
@@ -166,6 +167,15 @@ export default class Neovim extends Emitter {
       store.dispatch(A.changeIcon(icon))
       this.emit('change icon', icon)
     })
+    p.on('menu_show', info => {
+      this.emit('menu_show', info)
+    })
+    p.on('menu_select', index => {
+      this.emit('menu_select',index)
+    })
+    p.on('menu_hide', () => {
+      this.emit('menu_hide')
+    })
   }
   attachCanvas(canvas, width, height) {
     store.dispatch(A.changeSize(width, height))
@@ -182,7 +192,7 @@ export default class Neovim extends Emitter {
     const {lines, cols} = proxy.size
 
     this.process
-      .attach(lines, cols)
+      .attach(lines, cols, proxy.popupmenu_external)
       .then(() => {
         this.process.client.on('disconnect', () => {
           this.emit('quit')

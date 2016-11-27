@@ -51,6 +51,10 @@ Polymer({
       type: String,
       value: 'Neovim',
     },
+    popupmenuExternal: {
+      type: Boolean,
+      value: false
+    },
     editor: Object,
     onProcessAttached: Object,
     onQuit: Object,
@@ -63,6 +67,7 @@ Polymer({
       this.nvimCmd,
       this.argv,
       {
+        popupmenuExternal: this.popupmenuExternal,
         opacity: this.opacity,
         font: this.font,
         fontSize: this.fontSize,
